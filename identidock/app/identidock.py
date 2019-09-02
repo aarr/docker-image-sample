@@ -2,6 +2,7 @@ from flask import Flask, Response, request
 import redis
 import requests
 import hashlib
+import html
 
 app = Flask(__name__)
 cache = redis.StrictRedis(host='redis', port=6379, db=0)
@@ -14,7 +15,7 @@ def mainpage():
 
   name = default_name
   if request.method == 'POST':
-    name = request.form['name']
+    name = html.escape(request.form['name'], quote=True)
   print('REQUEST:' + request.method, flush=True)
 
   salted_name = salt + name
@@ -35,6 +36,7 @@ def mainpage():
 @app.route('/monster/<name>')
 def get_ideticon(name):
 
+  name = html.escape(name, quote=True)
   image = cache.get(name)
   if image is None:
     print("Cache mis", flush=True)
